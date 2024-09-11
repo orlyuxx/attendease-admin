@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Employee Attendance Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/index.css">
+    <script src="js/index.js" defer></script>
+</head>
+
+<body class="bg-gray-50 font-['Poppins'] flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md">
+        <div class="glass-card custom-shadow rounded-lg overflow-hidden bg-white">
+            <div class="text-center py-8 border-b border-gray-200 border-opacity-30">
+                <h1 class="text-2xl font-semibold text-gray-800">Sign In as Admin User</h1>
+            </div>
+            <form id="login-form" class="px-8 pt-6 pb-8" onsubmit="handleSubmit(event)">
+                <div class="mb-4 relative input-highlight">
+                    <input type="text" id="username" name="username" 
+                           class="peer w-full p-4 pt-4 text-sm border border-gray-300 rounded-md  focus:outline-none focus:border-blue-500 placeholder-transparent"
+                           placeholder="Email Address" required
+                           autocomplete="off">
+                    <label for="username" 
+                           class="absolute text-sm text-gray-600 duration-300 transform -translate-y-3 scale-75 top-3 z-10 origin-[0] left-4
+                                  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:top-4 
+                                  peer-focus:top-3 peer-focus:-translate-y-3 peer-focus:scale-75
+                                  before:content-[''] before:absolute before:top-2 before:left-0 before:w-full before:h-1/2 before:bg-white before:-z-10">
+                        Email Address
+                    </label>
+                </div>
+                <div class="mb-6 relative input-highlight">
+                    <input type="password" id="password" name="password" 
+                           class="peer w-full p-4 pt-4 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 placeholder-transparent"
+                           placeholder="Password" required
+                           autocomplete="new-password">
+                    <label for="password" 
+                           class="absolute text-sm text-gray-600 duration-300 transform -translate-y-3 scale-75 top-3 z-10 origin-[0] left-4 
+                                  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:top-4 
+                                  peer-focus:top-3 peer-focus:-translate-y-3 peer-focus:scale-75
+                                  before:content-[''] before:absolute before:top-2 before:left-0 before:w-full before:h-1/2 before:bg-white before:-z-10">
+                        Password
+                    </label>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 text-center mb-4">
+                    Sign In
+                </button>
+                <div class="text-center">
+                    <a href="#" class="text-sm text-blue-500 hover:text-blue-700">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
