@@ -1,11 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     fetchDepartments();
 
-    // Add event listener for logout button
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
-    }
 });
 
 function fetchDepartments() {
@@ -36,34 +31,4 @@ function displayDepartments(departments) {
         `;
         tableBody.appendChild(row);
     });
-}
-
-async function handleLogout() {
-    try {
-        const response = await fetch('http://attendease-backend.test/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-            },
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(data.message); // Log the success message
-
-        // Clear the token from localStorage
-        localStorage.removeItem('adminToken');
-
-        // Redirect to the login page
-        window.location.href = 'index.html';
-    } catch (error) {
-        console.error('Logout error:', error);
-        alert('An error occurred during logout. Please try again.');
-    }
 }

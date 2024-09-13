@@ -6,55 +6,8 @@
     <title>Attendease Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/dashboard.css">
-    <style>
-        body {
-            overflow: hidden;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 16rem;
-            overflow-y: auto;
-        }
-        .main-wrapper {
-            margin-left: 16rem;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .main-content {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .dashboard-card {
-            animation: fadeInUp 0.5s ease-out forwards;
-            opacity: 0;
-        }
-
-        #currentDate {
-            animation-delay: 0.25s;
-        }
-    </style>
 </head>
+
 <body class="bg-gray-100 font-sans">
     <!-- Sidebar -->
     <aside class="sidebar bg-gray-800 text-white">
@@ -176,25 +129,11 @@
                 <div class="flex justify-between items-center mb-4">
                     <h4 class="text-xl font-semibold text-gray-800">Monthly Employee Attendance</h4>
                     <div class="flex space-x-4">
-                        <select id="yearSelector" class="border rounded-md px-2 py-1"></select>
-                        <select id="monthSelector" class="border rounded-md px-2 py-1">
-                            <option value="0">January</option>
-                            <option value="1">February</option>
-                            <option value="2">March</option>
-                            <option value="3">April</option>
-                            <option value="4">May</option>
-                            <option value="5">June</option>
-                            <option value="6">July</option>
-                            <option value="7">August</option>
-                            <option value="8">September</option>
-                            <option value="9">October</option>
-                            <option value="10">November</option>
-                            <option value="11">December</option>
-                        </select>
+                        <!-- The month and year selectors will be inserted here by JavaScript -->
                     </div>
                 </div>
-                <div>
-                    <canvas id="employeeAttendanceChart" width="400" height="200"></canvas>
+                <div style="height: 600px;"> <!-- Increased height -->
+                    <canvas id="employeeAttendanceChart"></canvas>
                 </div>
                 <div class="text-center mt-4 text-sm text-gray-600 font-bold">
                     <p>Number of Days in a Month</p>
@@ -206,5 +145,6 @@
     <!-- Add Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

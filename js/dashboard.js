@@ -1,5 +1,4 @@
 let employeeAttendanceChart;
-let currentData;
 
 function generateDataKey(year, month) {
     return `attendanceData_${year}_${month}`;
@@ -14,224 +13,248 @@ function loadData(year, month) {
     return savedData ? JSON.parse(savedData) : null;
 }
 
-function fetchMonthlyData(year, month) {
-    const savedData = loadData(year, month);
-    if (savedData) {
-        return savedData;
-    }
+function clearAllData() {
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('attendanceData_')) {
+            localStorage.removeItem(key);
+        }
+    });
+}
 
+function fetchMonthlyData(year, month) {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
     const currentDay = today.getDate();
 
     const daysInMonth = getDaysInMonth(year, month);
-    const lastDay = (year < currentYear || (year === currentYear && month < currentMonth)) 
-        ? daysInMonth 
-        : (year === currentYear && month === currentMonth) 
-            ? currentDay 
-            : 0;
-
     const labels = [...Array(daysInMonth).keys()].map(i => i + 1);
-    const presentEmployees = [];
-    const absentEmployees = [];
-    const employeesOnLeave = [];
 
-    // Randomly select up to 8 days for employees to be on leave
-    const leaveDays = new Set();
-    const maxLeaveDays = Math.min(8, lastDay);
-    while (leaveDays.size < maxLeaveDays) {
-        leaveDays.add(Math.floor(Math.random() * lastDay));
-    }
-
-    for (let i = 0; i < daysInMonth; i++) {
-        if (i < lastDay) {
-            let present, onLeave, absent;
-
-            if (leaveDays.has(i)) {
-                // Day with employees on leave
-                onLeave = Math.floor(Math.random() * 3) + 1; // 1 to 3 employees on leave
-                absent = Math.floor(Math.random() * 4) + 1; // 1 to 4 employees absent
-                present = 138 - onLeave - absent;
-            } else {
-                // Regular day
-                onLeave = 0;
-                if (Math.random() < 0.3) { // 30% chance of perfect attendance
-                    present = 138;
-                    absent = 0;
-                } else {
-                    absent = Math.floor(Math.random() * 5) + 1; // 1 to 5 employees absent
-                    present = 138 - absent;
-                }
-            }
-
-            presentEmployees.push(present);
-            absentEmployees.push(absent);
-            employeesOnLeave.push(onLeave);
-        } else {
-            // Future days: push null values
-            presentEmployees.push(null);
-            absentEmployees.push(null);
-            employeesOnLeave.push(null);
+    // Only generate data for September (month index 8)
+    if (month === 8) {
+        // Try to load existing data for September
+        const existingData = loadData(year, month);
+        if (existingData) {
+            return existingData;
         }
-    }
 
-    const data = { labels, presentEmployees, absentEmployees, employeesOnLeave };
-    saveData(year, month, data);
-    return data;
+        // Generate new data for September if it doesn't exist
+        const presentEmployees = [];
+        const absentEmployees = [];
+        const employeesOnLeave = [];
+
+        for (let i = 0; i < daysInMonth; i++) {
+            if (year < currentYear || (year === currentYear && month < currentMonth) || (year === currentYear && month === currentMonth && i < currentDay)) {
+                let present, onLeave, absent;
+
+                if (Math.random() < 0.2) { // 20% chance of employees on leave
+                    onLeave = Math.floor(Math.random() * 3) + 1; // 1 to 3 employees on leave
+                    absent = Math.floor(Math.random() * 4) + 1; // 1 to 4 employees absent
+                    present = 138 - onLeave - absent;
+                } else {
+                    onLeave = 0;
+                    if (Math.random() < 0.3) { // 30% chance of perfect attendance
+                        present = 138;
+                        absent = 0;
+                    } else {
+                        absent = Math.floor(Math.random() * 5) + 1; // 1 to 5 employees absent
+                        present = 138 - absent;
+                    }
+                }
+
+                presentEmployees.push(present);
+                absentEmployees.push(absent);
+                employeesOnLeave.push(onLeave);
+            } else {
+                // Future days: push null values
+                presentEmployees.push(null);
+                absentEmployees.push(null);
+                employeesOnLeave.push(null);
+            }
+        }
+
+        const newData = { labels, presentEmployees, absentEmployees, employeesOnLeave };
+        saveData(year, month, newData);
+        return newData;
+    } else {
+        // Return empty data for all other months
+        return {
+            labels,
+            presentEmployees: Array(daysInMonth).fill(null),
+            absentEmployees: Array(daysInMonth).fill(null),
+            employeesOnLeave: Array(daysInMonth).fill(null)
+        };
+    }
 }
 
 function updateChart() {
-    const selectedYear = parseInt(document.getElementById('yearSelector').value);
     const selectedMonth = parseInt(document.getElementById('monthSelector').value);
+    const selectedYear = parseInt(document.getElementById('yearSelector').value);
 
-    currentData = fetchMonthlyData(selectedYear, selectedMonth);
+    const data = fetchMonthlyData(selectedYear, selectedMonth);
 
-    employeeAttendanceChart.data.labels = currentData.labels;
-    employeeAttendanceChart.data.datasets[0].data = currentData.presentEmployees;
-    employeeAttendanceChart.data.datasets[1].data = currentData.absentEmployees;
-    employeeAttendanceChart.data.datasets[2].data = currentData.employeesOnLeave;
+    employeeAttendanceChart.data.labels = data.labels;
+    employeeAttendanceChart.data.datasets[0].data = data.presentEmployees;
+    employeeAttendanceChart.data.datasets[1].data = data.absentEmployees;
+    employeeAttendanceChart.data.datasets[2].data = data.employeesOnLeave;
     employeeAttendanceChart.update();
 
-    updateDashboardCards();
-
-    console.log('Chart updated for:', { selectedYear, selectedMonth });
+    console.log('Chart updated for:', { year: selectedYear, month: months[selectedMonth] });
 }
 
-function updateChartAndCards() {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    // Update the current date display
-    document.getElementById('currentDate').textContent = formatDate(now);
-
-    // Set the selectors to the current year and month
-    document.getElementById('yearSelector').value = currentYear;
-    document.getElementById('monthSelector').value = currentMonth;
-
-    currentData = fetchMonthlyData(currentYear, currentMonth);
-
-    // Update the chart
-    employeeAttendanceChart.data.labels = currentData.labels;
-    employeeAttendanceChart.data.datasets[0].data = currentData.presentEmployees;
-    employeeAttendanceChart.data.datasets[1].data = currentData.absentEmployees;
-    employeeAttendanceChart.data.datasets[2].data = currentData.employeesOnLeave;
-    employeeAttendanceChart.update();
-
-    // Update the dashboard cards
-    updateDashboardCards();
-
-    console.log('Chart data updated:', currentData);
-}
-
-function formatDate(date) {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-}
+// Add this at the top of your file with other global variables
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('employeeAttendanceChart').getContext('2d');
-    const yearSelector = document.getElementById('yearSelector');
-    const monthSelector = document.getElementById('monthSelector');
+    
+    // Create month and year selectors
+    const monthSelector = document.createElement('select');
+    monthSelector.id = 'monthSelector';
+    const yearSelector = document.createElement('select');
+    yearSelector.id = 'yearSelector';
 
-    // Populate year selector
+    // Populate month selector
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = month;
+        monthSelector.appendChild(option);
+    });
+
+    // Populate year selector (current year and next year)
     const currentYear = new Date().getFullYear();
-    for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+    [currentYear, currentYear + 1].forEach(year => {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
         yearSelector.appendChild(option);
-    }
+    });
 
-    // Set default date to current month and year
-    yearSelector.value = currentYear;
-    monthSelector.value = new Date().getMonth();
+    // Set default values to current month and year
+    const today = new Date();
+    monthSelector.value = today.getMonth();
+    yearSelector.value = today.getFullYear();
+
+    // Replace the existing selector with new month and year selectors
+    const selectorContainer = document.querySelector('.flex.space-x-4');
+    selectorContainer.innerHTML = '';
+    selectorContainer.appendChild(monthSelector);
+    selectorContainer.appendChild(yearSelector);
 
     employeeAttendanceChart = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: [],
             datasets: [
                 {
                     label: 'Present Employees',
                     data: [],
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
                     borderColor: 'rgba(75, 192, 192, 1)',
-                    tension: 0.1
+                    borderWidth: 1,
+                    barThickness: 8  // Add this line to increase bar thickness
                 },
                 {
                     label: 'Absent Employees',
                     data: [],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
                     borderColor: 'rgba(255, 99, 132, 1)',
-                    tension: 0.1
+                    borderWidth: 1,
+                    barThickness: 8  // Add this line to increase bar thickness
                 },
                 {
                     label: 'Employees on Leave',
                     data: [],
+                    backgroundColor: 'rgba(255, 206, 86, 0.8)',
                     borderColor: 'rgba(255, 206, 86, 1)',
-                    tension: 0.1
+                    borderWidth: 1,
+                    barThickness: 8  // Add this line to increase bar thickness
                 }
             ]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Days of the Month',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
                 y: {
                     beginAtZero: true,
-                    suggestedMax: 140
+                    title: {
+                        display: true,
+                        text: 'Number of Employees',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    suggestedMax: 140,
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Monthly Employee Attendance',
+                    font: {
+                        size: 18
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    left: 20
                 }
             }
         }
     });
 
-    // Add this line to update the current date immediately
     document.getElementById('currentDate').textContent = formatDate(new Date());
 
-    // Event listeners for inputs
-    yearSelector.addEventListener('change', updateChart);
     monthSelector.addEventListener('change', updateChart);
+    yearSelector.addEventListener('change', updateChart);
 
-    // Initial chart update
     updateChart();
+    updateDashboardCards(); // Initial update of dashboard cards
 
-    // Update chart and cards every minute
-    setInterval(updateChartAndCards, 60000);
-
-    // Add event listener for logout button
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
-    }
+    setInterval(updateDashboardCards, 60000);
 });
 
-// Add this function to handle logout
-async function handleLogout() {
-    try {
-        const response = await fetch('http://attendease-backend.test/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-            },
-            credentials: 'include',
-        });
+function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+}
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(data.message); // Log the success message
-
-        // Clear the token from localStorage
-        localStorage.removeItem('adminToken');
-
-        // Redirect to the login page
-        window.location.href = 'index.html';
-    } catch (error) {
-        console.error('Logout error:', error);
-        alert('An error occurred during logout. Please try again.');
-    }
+function formatDate(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
 }
 
 function updateDashboardCards() {
@@ -241,34 +264,19 @@ function updateDashboardCards() {
     const currentDay = today.getDate() - 1; // Adjust for 0-based index
 
     const totalEmployees = 138;
-    let presentToday, absentToday, onLeaveToday;
+    let currentMonthData = fetchMonthlyData(currentYear, currentMonth);
 
-    // Always load the current month's data for the cards
-    const currentMonthData = loadData(currentYear, currentMonth);
-
-    if (currentMonthData && currentMonthData.presentEmployees[currentDay] !== null) {
-        presentToday = currentMonthData.presentEmployees[currentDay];
-        absentToday = currentMonthData.absentEmployees[currentDay];
-        onLeaveToday = currentMonthData.employeesOnLeave[currentDay];
-    } else {
-        // If data for the current day doesn't exist, generate it
-        let data = fetchMonthlyData(currentYear, currentMonth);
-        presentToday = data.presentEmployees[currentDay];
-        absentToday = data.absentEmployees[currentDay];
-        onLeaveToday = data.employeesOnLeave[currentDay];
-        
-        // Save the updated data
-        saveData(currentYear, currentMonth, data);
-    }
+    const presentToday = currentMonthData.presentEmployees[currentDay] || 0;
+    const absentToday = currentMonthData.absentEmployees[currentDay] || 0;
+    const onLeaveToday = currentMonthData.employeesOnLeave[currentDay] || 0;
 
     document.getElementById('totalEmployees').textContent = totalEmployees;
     document.getElementById('presentToday').textContent = presentToday;
     document.getElementById('absentToday').textContent = absentToday;
     document.getElementById('onLeaveToday').textContent = onLeaveToday;
 
-    console.log('Dashboard updated:', { totalEmployees, presentToday, absentToday, onLeaveToday });
-}
+    // Update the date display
+    document.getElementById('currentDate').textContent = formatDate(today);
 
-function getDaysInMonth(year, month) {
-    return new Date(year, month + 1, 0).getDate();
+    console.log('Dashboard updated:', { totalEmployees, presentToday, absentToday, onLeaveToday, date: formatDate(today) });
 }
