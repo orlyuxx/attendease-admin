@@ -72,20 +72,19 @@
         <!-- Main content -->
         <main class="main-content bg-white p-6 pt-11">
             <div class="flex items-center mb-8 dashboard-title">
-                <h3 class="text-2xl font-semibold text-gray-800 mr-8">Dashboard</h3>
-                    <div class="flex pt-1 items-center text-sm text-gray-600">
+                    <div class="ml-6 flex pt-1 items-center text-sm text-gray-800 font-semibold">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-600">
                             <path d="M1 6V15H6V11C6 9.89543 6.89543 9 8 9C9.10457 9 10 9.89543 10 11V15H15V6L8 0L1 6Z" fill="currentColor"/>
                         </svg>
-                        <a href="#" class="flex items-center">
+                        <span class="flex items-center">
                             <span class="mx-2">/</span>
-                            <span>Dashboard</span>
-                        </a>
+                            <span class="flex items-center">Dashboard</span>
+                        </span>
                     </div>
             </div>
-            <div id="currentDate" class="text-lg font-semibold text-gray-600 mb-6 dashboard-card"></div>
+            <div id="currentDate" class="ml-6 text-lg font-semibold text-gray-600 mb-6 dashboard-card"></div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="ml-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="bg-blue-500 rounded-lg shadow-sm p-6 text-white dashboard-card">
                     <div class="flex flex-col items-start">
                         <div class="flex items-center mb-2">
@@ -125,7 +124,7 @@
             </div>
 
             <!-- Modified chart section -->
-            <div class="mt-12 bg-white p-6 rounded-lg shadow-sm dashboard-card">
+            <div class="mt-12 bg-white p-6 rounded-lg shadow-xl border border-gray-200 dashboard-card">
                 <div class="flex justify-between items-center mb-4">
                     <h4 class="text-xl font-semibold text-gray-800">Monthly Employee Attendance</h4>
                     <div class="flex space-x-4">
@@ -134,9 +133,6 @@
                 </div>
                 <div style="height: 600px;"> <!-- Increased height -->
                     <canvas id="employeeAttendanceChart"></canvas>
-                </div>
-                <div class="text-center mt-4 text-sm text-gray-600 font-bold">
-                    <p>Number of Days in a Month</p>
                 </div>
             </div>
         </main>

@@ -25,8 +25,8 @@ function displayDepartments(departments) {
             <td class="py-3 px-4">${index + 1}</td>
             <td class="py-3 px-4">${department.department_name}</td>
             <td class="py-3 px-4">
-                <button class="text-blue-500 hover:text-blue-700 mr-2">Update</button>
-                <button class="text-red-500 hover:text-red-700">Delete</button>
+                <button class="text-blue-400 hover:text-blue-700 mr-2">Update</button>
+                <button class="text-red-400 hover:text-red-700">Delete</button>
             </td>
         `;
         tableBody.appendChild(row);

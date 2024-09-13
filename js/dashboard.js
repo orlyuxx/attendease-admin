@@ -246,6 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDashboardCards(); // Initial update of dashboard cards
 
     setInterval(updateDashboardCards, 60000);
+
 });
 
 function getDaysInMonth(year, month) {
