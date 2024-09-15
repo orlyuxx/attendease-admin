@@ -1,4 +1,5 @@
 async function handleSubmit(event) {
+    console.log('handleSubmit called');
     event.preventDefault();
 
     const username = document.getElementById('username').value;

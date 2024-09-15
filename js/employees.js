@@ -2,10 +2,6 @@ let departments = {};
 let employees = [];
 let currentSort = { column: null, direction: 'asc' };
 
-// Add these variables at the top of the file
-let toastTimeout;
-let deleteEmployeeId;
-
 document.addEventListener('DOMContentLoaded', function() {
     fetchDepartments().then(() => {
         fetchEmployees();
@@ -18,12 +14,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function fetchDepartments() {
     try {
-        const response = await fetch('http://attendease-backend.test/api/department');
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('http://attendease-backend.test/api/department', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         console.log('Departments Data:', data);
+
+        if (data.length === 0) {
+            console.warn('No departments returned from API');
+        }
 
         // Populate departments object with correct property names
         departments = data.reduce((acc, dept) => {
@@ -33,26 +38,46 @@ async function fetchDepartments() {
         console.log('Departments Object:', departments);
     } catch (error) {
         console.error('Error fetching departments:', error);
+        showToast('Failed to fetch departments: ' + error.message, 'error');
     }
 }
 
 async function fetchEmployees() {
     try {
-        const response = await fetch('http://attendease-backend.test/api/user');
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('http://attendease-backend.test/api/user', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         employees = await response.json();
         console.log('Employees Data:', employees);
+
+        if (employees.length === 0) {
+            console.warn('No employees returned from API');
+            showToast('No employees found', 'warning');
+        }
+
         displayEmployees(employees);
     } catch (error) {
         console.error('Error fetching employees:', error);
+        showToast('Failed to fetch employees: ' + error.message, 'error');
     }
 }
 
 function displayEmployees(employeesToDisplay) {
     const tableBody = document.getElementById('employeesTableBody');
     tableBody.innerHTML = '';
+
+    if (employeesToDisplay.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="5" class="text-center py-4">No employees found</td>';
+        tableBody.appendChild(row);
+        return;
+    }
 
     employeesToDisplay.forEach((employee, index) => {
         const row = document.createElement('tr');
@@ -88,18 +113,59 @@ function updateEmployee(employeeId) {
     // Implement update logic here
 }
 
-async function deleteEmployee(employeeId) {
-    deleteEmployeeId = employeeId;
-    document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+function deleteEmployee(employeeId) {
+    showDeleteConfirmationModal(employeeId);
 }
 
-// Add this function to handle the actual deletion
-async function confirmDeleteEmployee() {
+function showDeleteConfirmationModal(employeeId) {
+    const modal = document.getElementById('deleteConfirmationModal');
+    const confirmBtn = document.getElementById('deleteConfirmBtn');
+    const cancelBtn = document.getElementById('deleteCancelBtn');
+    const employeeNameSpan = document.getElementById('employeeNameToDelete');
+
+    // Find the employee by ID
+    const employeeToDelete = employees.find(emp => emp.employee_id === employeeId);
+
+    if (employeeToDelete) {
+        employeeNameSpan.textContent = employeeToDelete.name;
+    } else {
+        employeeNameSpan.textContent = 'Unknown Employee';
+    }
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+    }, 10);
+
+    confirmBtn.onclick = async () => {
+        hideDeleteConfirmationModal();
+        await performDeleteEmployee(employeeId);
+    };
+
+    cancelBtn.onclick = hideDeleteConfirmationModal;
+}
+
+function hideDeleteConfirmationModal() {
+    const modal = document.getElementById('deleteConfirmationModal');
+    modal.classList.add('opacity-0');
+    modal.querySelector('div').classList.remove('scale-100');
+    modal.querySelector('div').classList.add('scale-95');
+
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+async function performDeleteEmployee(employeeId) {
     try {
-        const response = await fetch(`http://attendease-backend.test/api/user/${deleteEmployeeId}`, {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`http://attendease-backend.test/api/user/${employeeId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
         });
 
@@ -108,29 +174,12 @@ async function confirmDeleteEmployee() {
             throw new Error(errorData.message || 'Error deleting employee');
         }
 
-        console.log(`Employee with ID: ${deleteEmployeeId} deleted successfully`);
+        showToast('Employee deleted successfully', 'success');
         await fetchEmployees();
-        showToast('Employee deleted successfully');
     } catch (error) {
         console.error('Error deleting employee:', error);
-        showToast('An error occurred while deleting the employee: ' + error.message, true);
-    } finally {
-        document.getElementById('deleteConfirmationModal').classList.add('hidden');
+        showToast('An error occurred while deleting the employee: ' + error.message, 'error');
     }
-}
-
-// Add this function to show toast notifications
-function showToast(message, isError = false) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
-    toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
-    toast.classList.add('flex');
-
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        toast.classList.add('hidden');
-    }, 3000);
 }
 
 function sortEmployees() {
@@ -190,52 +239,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add event listeners for the delete confirmation modal
-document.addEventListener('DOMContentLoaded', function() {
-    const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
-    const deleteCancelBtn = document.getElementById('deleteCancelBtn');
-
-    deleteConfirmBtn.addEventListener('click', confirmDeleteEmployee);
-    deleteCancelBtn.addEventListener('click', function() {
-        document.getElementById('deleteConfirmationModal').classList.add('hidden');
-    });
-});
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastContent = document.getElementById('toastContent');
+    
+    toastContent.textContent = message;
+    toast.classList.remove('bg-green-500', 'bg-red-500');
+    toast.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+    
+    toast.classList.remove('hidden');
+    
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
 
 document.getElementById('addEmployeeForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
-    // Gather form data
     const formData = new FormData(this);
-    const payload = Object.fromEntries(formData);
-
-    // Convert numeric fields to integers
-    payload.department_id = parseInt(payload.department_id, 10);
-    payload.shift_id = parseInt(payload.shift_id, 10);
+    const payload = Object.fromEntries(formData.entries());
 
     try {
+        const token = localStorage.getItem('authToken');
         const response = await fetch('http://attendease-backend.test/api/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || 'Error creating user');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error creating user');
         }
 
-        console.log('User created successfully:', data);
-        this.reset();
+        showToast('Employee added successfully', 'success');
         document.getElementById('addEmployeeModal').classList.add('hidden');
-        
+        this.reset();
         await fetchEmployees();
-        
-        showToast('User created successfully');
     } catch (error) {
         console.error('Error:', error);
-        showToast('An error occurred: ' + error.message, true);
+        showToast('Error creating employee: ' + error.message, 'error');
     }
 });

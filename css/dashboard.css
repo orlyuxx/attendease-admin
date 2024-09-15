@@ -1,6 +1,18 @@
 body {
     overflow: hidden;
+    animation: fadeIn 0.5s ease-out forwards;
+    opacity: 0;
 }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 .sidebar {
     position: fixed;
     top: 0;
@@ -9,20 +21,62 @@ body {
     width: 16rem;
     overflow-y: auto;
 }
+
+.sidebar-link {
+    opacity: 0;
+    animation: fadeInSidebar 0.5s ease-out forwards;
+    transition: all 0.3s ease-out;
+}
+
+@keyframes fadeInSidebar {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Main menu items */
+.dashboard-link { animation-delay: 0.1s; }
+.employees-link { animation-delay: 0.2s; }
+.attendance-link { animation-delay: 0.3s; }
+.departments-link { animation-delay: 0.4s; }
+
+/* System menu items */
+.sidebar nav > div:last-of-type { animation-delay: 0.5s; }
+.settings-link { animation-delay: 0.6s; }
+.logout-link { animation-delay: 0.7s; }
+
+.sidebar-link:hover, .sidebar-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid white;
+    padding-left: calc(1rem - 4px);
+}
+
 .main-wrapper {
     margin-left: 16rem;
     height: 100vh;
     display: flex;
     flex-direction: column;
 }
+
 .header {
     position: sticky;
     top: 0;
     z-index: 10;
 }
+
 .main-content {
     flex-grow: 1;
     overflow-y: auto;
+}
+
+.dashboard-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
 }
 
 @keyframes fadeInUp {
@@ -36,19 +90,10 @@ body {
     }
 }
 
-.dashboard-card {
-    animation: fadeInUp 0.5s ease-out forwards;
-    opacity: 0;
-}
-
-#currentDate {
-    animation-delay: 0.25s;
-}
-
-.sidebar-link:hover, .sidebar-link.active {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-left: 4px solid white;
-}
+.dashboard-card:nth-child(1) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.4s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.5s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.6s; }
 
 #currentDate {
     font-size: 1.25rem;
@@ -88,14 +133,6 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.sidebar {
-    animation: slideInLeft 0.8s ease-out forwards;
-}
-
-.header {
-    animation: slideInTop 0.8s ease-out forwards;
 }
 
 .dashboard-title {

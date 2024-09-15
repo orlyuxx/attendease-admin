@@ -35,6 +35,14 @@ function fetchMonthlyData(year, month) {
         // Try to load existing data for September
         const existingData = loadData(year, month);
         if (existingData) {
+            // Add data for September 14th
+            const sept14Index = 13; // September 14th is the 14th day, so index 13
+            existingData.presentEmployees[sept14Index] = 130;
+            existingData.absentEmployees[sept14Index] = 5;
+            existingData.employeesOnLeave[sept14Index] = 3;
+            
+            // Save the updated data
+            saveData(year, month, existingData);
             return existingData;
         }
 
@@ -259,7 +267,7 @@ function formatDate(date) {
 }
 
 function updateDashboardCards() {
-    const today = new Date();
+    const today = new Date(2023, 8, 14); // September 14, 2023
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
     const currentDay = today.getDate() - 1; // Adjust for 0-based index
