@@ -71,7 +71,29 @@ export default function DashboardCharts() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    fontSize: '14px',
+                    minWidth: '150px'  // Slightly smaller than bar chart tooltip
+                  }}
+                  itemStyle={{
+                    color: '#71717A',
+                    padding: '4px 0',
+                    fontSize: '13px'
+                  }}
+                  formatter={(value, name) => [
+                    `${value} employees`,
+                    name
+                  ]}
+                  wrapperStyle={{
+                    outline: 'none'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -119,10 +141,13 @@ export default function DashboardCharts() {
               </div>
             ))}
 
-            <Link href="/dashboard/attendance">
-                <p className="text-sm font-semibold pt-20 underline hover:text-[#09090b] transition-colors duration-200">
-                  view all
-                </p>
+            <Link 
+              href="/dashboard/attendance" 
+              className="inline-block mt-4 pt-16"
+            >
+              <p className="text-sm font-semibold underline hover:text-[#09090b] transition-colors duration-200">
+                view all
+              </p>
             </Link>
           </div>
         </Card>
@@ -194,21 +219,42 @@ export default function DashboardCharts() {
               <Tooltip 
                 contentStyle={{
                   backgroundColor: 'white',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  padding: '10px'
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  fontSize: '14px',
+                  minWidth: '200px'  // Set minimum width
+                }}
+                labelStyle={{
+                  color: '#09090b',
+                  fontWeight: 600,
+                  marginBottom: '8px',
+                  fontSize: '14px'
+                }}
+                itemStyle={{
+                  color: '#71717A',
+                  padding: '4px 0',
+                  fontSize: '13px'
                 }}
                 labelFormatter={(_, payload) => {
                   if (payload && payload.length > 0) {
                     const date = payload[0].payload.fullDate;
                     return date.toLocaleDateString('default', { 
                       month: 'short',
-                      day: 'numeric'
+                      day: 'numeric',
+                      year: 'numeric'
                     });
                   }
                   return '';
                 }}
-                formatter={(value, name) => [`${value} employees`, name]}
+                formatter={(value, name) => [
+                  `${value} employees`,
+                  name
+                ]}
+                wrapperStyle={{
+                  outline: 'none'  // Removes the default outline
+                }}
               />
               <Legend 
                 verticalAlign="top" 

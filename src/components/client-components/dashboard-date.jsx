@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-export default function DateTimeDisplay() {
+export default function DashboardDate() {
   const [currentTime, setCurrentTime] = useState(null);
 
   useEffect(() => {
