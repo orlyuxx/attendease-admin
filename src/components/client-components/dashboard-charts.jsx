@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { Card, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import MonthSelector from "@/components/month-selector";
+import MonthSelector from "@/components/client-components/month-selector";
 
 export default function DashboardCharts() {
   // Initialize the selectedMonth state with current month
@@ -130,9 +130,9 @@ export default function DashboardCharts() {
                 <span
                   className={`px-2 py-1 rounded-full text-sm ${
                     log.status === "Present"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-green-200 text-green-800"
                       : log.status === "Late"
-                      ? "bg-yellow-100 text-yellow-800"
+                      ? "bg-red-200 text-red-800"
                       : "bg-red-100 text-red-800"
                   }`}
                 >

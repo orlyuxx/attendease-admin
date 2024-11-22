@@ -12,8 +12,10 @@ import {
   CalendarDays,
   Printer,
   Settings,
-  LogOut
+  LogOut,
+  MoreVertical
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 import {
   Sidebar,
@@ -90,6 +92,13 @@ export const data = {
   ],
 }
 
+// Modify the icon rendering to be dynamic based on active state
+const renderIcon = (icon, isActive) => {
+  return React.cloneElement(icon, {
+    className: `h-4 w-4 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'}`
+  });
+};
+
 export function AppSidebar({
   ...props
 }) {
@@ -144,13 +153,15 @@ export function AppSidebar({
                           asChild 
                           className={`${
                             isActiveUrl(subItem.url) 
-                              ? "bg-accent text-accent-foreground" 
-                              : "hover:bg-accent hover:text-accent-foreground"
+                              ? "bg-accent text-accent-foreground font-medium hover:bg-accent" 
+                              : "hover:bg-accent hover:text-accent-foreground hover:font-medium transition-all"
                           }`}
                         >
                           <a href={subItem.url} className="flex items-center gap-2">
-                            {subItem.icon}
-                            {subItem.title}
+                            {renderIcon(subItem.icon, isActiveUrl(subItem.url))}
+                            <span className={`transition-all ${isActiveUrl(subItem.url) ? "font-bold" : ""}`}>
+                              {subItem.title}
+                            </span>
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -163,6 +174,22 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />
+      <div className="mt-auto border-t">
+        <div className="p-4 flex items-center gap-4">
+          <img 
+            src="/profile.jpg"
+            alt="Profile avatar" 
+            className="w-8 h-8 rounded-md"
+          />
+          <div className="flex flex-col flex-1">
+            <span className="text-sm font-medium">Your Name</span>
+            <span className="text-xs text-muted-foreground">email@example.com</span>
+          </div>
+          <Button variant="ghost" size="icon" className="ml-auto">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </Sidebar>
   );
 }

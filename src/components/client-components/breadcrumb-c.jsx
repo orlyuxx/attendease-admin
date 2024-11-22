@@ -9,7 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { data } from "@/components/app-sidebar"; // Import your navigation data
+import { data } from "@/components/client-components/app-sidebar"; // Import your navigation data
 
 export function BreadcrumbNav() {
   const pathname = usePathname();

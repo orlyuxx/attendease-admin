@@ -38,10 +38,10 @@ export default function DashboardDate() {
 
   return (
     <div className="flex items-center gap-4">
-      <h2 className="text-md font-semibold ">
+      <h2 className="text-sm font-semibold ">
         {currentDate}
       </h2>
-      <h2 className="text-md font-semibold ">
+      <h2 className="text-sm font-semibold ">
         {formattedTime}
       </h2>
     </div>

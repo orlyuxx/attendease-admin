@@ -1,5 +1,5 @@
-import { TableDemo } from "@/components/table"
-import { SearchBar } from "@/components/searchbar"
+import { TableDemo } from "@/components/client-components/table"
+import { SearchBar } from "@/components/client-components/searchbar"
 import { Button } from "@/components/ui/button"
 import {
   Card,
