@@ -182,8 +182,8 @@ export function AppSidebar({
             className="w-8 h-8 rounded-md"
           />
           <div className="flex flex-col flex-1">
-            <span className="text-sm font-medium">Your Name</span>
-            <span className="text-xs text-muted-foreground">email@example.com</span>
+            <span className="text-sm font-medium">Admin</span>
+            <span className="text-xs text-muted-foreground">admin@gmail.com</span>
           </div>
           <Button variant="ghost" size="icon" className="ml-auto">
             <MoreVertical className="h-4 w-4" />

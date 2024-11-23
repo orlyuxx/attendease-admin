@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/pagination"
 import { AddEmployeeForm } from "./add-employee-form"
 import { ArrowUpDown } from "lucide-react"
+import { UpdateEmployeeForm } from "./update-employee-form"
+import { DeleteEmployee } from "./delete-employee"
 
 // Helper function to format employee ID
 const formatEmployeeId = (id) => {
@@ -223,6 +225,11 @@ export function EmployeesTable() {
     }
   }
 
+  const handleEmployeeDeleted = () => {
+    // Refresh the employees list
+    refreshEmployees()
+  }
+
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
 
@@ -342,20 +349,14 @@ export function EmployeesTable() {
                 
                 <TableCell className="text-right py-2.5">
                   <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600"
-                    >
-                      Update
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="hover:bg-red-100 hover:text-red-600 hover:border-red-600"
-                    >
-                      Delete
-                    </Button>
+                    <UpdateEmployeeForm 
+                      employee={user} 
+                      onEmployeeUpdated={refreshEmployees}
+                    />
+                    <DeleteEmployee 
+                      employee={user}
+                      onEmployeeDeleted={handleEmployeeDeleted}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
