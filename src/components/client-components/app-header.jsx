@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -13,9 +14,46 @@ import { Settings, LogOut } from "lucide-react";
 import { BreadcrumbNav } from "./breadcrumb-c";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
+import { toast } from "@/components/ui/toast";
 
 export function AppHeader() {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('http://attendease-backend.test/api/logout', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Logout failed')
+      }
+
+      localStorage.removeItem('token')
+      
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+        variant: "default"
+      })
+
+      router.push('/login')
+      
+    } catch (err) {
+      console.error('Error logging out:', err)
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive"
+      })
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,7 +99,10 @@ export function AppHeader() {
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer text-red-600 dark:text-red-400">
+            <DropdownMenuItem 
+              onClick={handleLogout}
+              className="cursor-pointer text-red-600 dark:text-red-400"
+            >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </DropdownMenuItem>

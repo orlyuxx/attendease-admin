@@ -47,7 +47,13 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <form 
+          onSubmit={handleSubmit} 
+          autoComplete="off" 
+          spellCheck="false"
+          data-form-type="other"
+          className="grid gap-4"
+        >
           {error && (
             <div className="p-3 text-sm text-red-500 bg-red-100 rounded">
               {error}
@@ -62,6 +68,9 @@ export function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="example@gmail.com"
               required
+              autoComplete="new-email"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
           <div className="grid gap-2">
@@ -77,6 +86,10 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required 
+              autoComplete="new-password"
+              autoCorrect="off"
+              spellCheck="false"
+              aria-autocomplete="none"
             />
           </div>
           <Button 

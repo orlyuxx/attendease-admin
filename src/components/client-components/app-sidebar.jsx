@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react"
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -16,6 +17,7 @@ import {
   MoreVertical
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/toast"
 
 import {
   Sidebar,
@@ -31,83 +33,121 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-// Export the data without isActive property - we'll compute it dynamically
-export const data = {
-  navMain: [
-    {
-      title: "Main",
-      items: [
-        {
-          title: "Dashboard",
-          url: "/dashboard",
-          icon: <LayoutDashboard className="h-4 w-4" />,
-        },
-        {
-          title: "Employees",
-          url: "/dashboard/employees",
-          icon: <Users className="h-4 w-4" />,
-        },
-        {
-          title: "Attendance",
-          url: "/dashboard/attendance",
-          icon: <ClipboardCheck className="h-4 w-4" />,
-        },
-        {
-          title: "Departments",
-          url: "/dashboard/departments",
-          icon: <Building2 className="h-4 w-4" />,
-        },
-        {
-          title: "Shifts",
-          url: "/dashboard/shifts",
-          icon: <Clock className="h-4 w-4" />,
-        },
-        {
-          title: "Leaves",
-          url: "/dashboard/leaves",
-          icon: <CalendarDays className="h-4 w-4" />,
-        },
-      ],
-    },
-    {
-      title: "System",
-      items: [
-        {
-          title: "Print Records",
-          url: "/dashboard/print",
-          icon: <Printer className="h-4 w-4" />,
-        },
-        {
-          title: "Settings",
-          url: "/dashboard/user-settings",
-          icon: <Settings className="h-4 w-4" />,
-        },
-        {
-          title: "Logout",
-          url: "#",
-          icon: <LogOut className="h-4 w-4" />,
-        },
-      ],
-    },
-  ],
-}
-
-// Modify the icon rendering to be dynamic based on active state
-const renderIcon = (icon, isActive) => {
-  return React.cloneElement(icon, {
-    className: `h-4 w-4 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'}`
-  });
-};
-
 export function AppSidebar({
   ...props
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Move handleLogout inside the component
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('http://attendease-backend.test/api/logout', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Logout failed')
+      }
+
+      localStorage.removeItem('token')
+      
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+        variant: "default"
+      })
+
+      router.push('/login')
+      
+    } catch (err) {
+      console.error('Error logging out:', err)
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Move data object inside component to use handleLogout
+  const data = {
+    navMain: [
+      {
+        title: "Main",
+        items: [
+          {
+            title: "Dashboard",
+            url: "/dashboard",
+            icon: <LayoutDashboard className="h-4 w-4" />,
+          },
+          {
+            title: "Employees",
+            url: "/dashboard/employees",
+            icon: <Users className="h-4 w-4" />,
+          },
+          {
+            title: "Attendance",
+            url: "/dashboard/attendance",
+            icon: <ClipboardCheck className="h-4 w-4" />,
+          },
+          {
+            title: "Departments",
+            url: "/dashboard/departments",
+            icon: <Building2 className="h-4 w-4" />,
+          },
+          {
+            title: "Shifts",
+            url: "/dashboard/shifts",
+            icon: <Clock className="h-4 w-4" />,
+          },
+          {
+            title: "Leaves",
+            url: "/dashboard/leaves",
+            icon: <CalendarDays className="h-4 w-4" />,
+          },
+        ],
+      },
+      {
+        title: "System",
+        items: [
+          {
+            title: "Print Records",
+            url: "/dashboard/print",
+            icon: <Printer className="h-4 w-4" />,
+          },
+          {
+            title: "Settings",
+            url: "/dashboard/user-settings",
+            icon: <Settings className="h-4 w-4" />,
+          },
+          {
+            title: "Logout",
+            url: "#",
+            icon: <LogOut className="h-4 w-4" />,
+            onClick: handleLogout
+          },
+        ],
+      },
+    ],
+  }
 
   // Function to check if a URL matches the current path
   const isActiveUrl = (url) => {
     if (url === "#") return false;
     return pathname === url;
+  };
+
+  // Modify the icon rendering to be dynamic based on active state
+  const renderIcon = (icon, isActive) => {
+    return React.cloneElement(icon, {
+      className: `h-4 w-4 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'}`
+    });
   };
 
   return (
@@ -157,12 +197,24 @@ export function AppSidebar({
                               : "hover:bg-accent hover:text-accent-foreground hover:font-medium transition-all"
                           }`}
                         >
-                          <a href={subItem.url} className="flex items-center gap-2">
-                            {renderIcon(subItem.icon, isActiveUrl(subItem.url))}
-                            <span className={`transition-all ${isActiveUrl(subItem.url) ? "font-bold" : ""}`}>
-                              {subItem.title}
-                            </span>
-                          </a>
+                          {subItem.onClick ? (
+                            <button 
+                              onClick={subItem.onClick}
+                              className="flex items-center gap-2 w-full"
+                            >
+                              {renderIcon(subItem.icon, isActiveUrl(subItem.url))}
+                              <span className={`transition-all ${isActiveUrl(subItem.url) ? "font-bold" : ""}`}>
+                                {subItem.title}
+                              </span>
+                            </button>
+                          ) : (
+                            <a href={subItem.url} className="flex items-center gap-2">
+                              {renderIcon(subItem.icon, isActiveUrl(subItem.url))}
+                              <span className={`transition-all ${isActiveUrl(subItem.url) ? "font-bold" : ""}`}>
+                                {subItem.title}
+                              </span>
+                            </a>
+                          )}
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
@@ -192,4 +244,32 @@ export function AppSidebar({
       </div>
     </Sidebar>
   );
+}
+
+// Export the data structure (without the handleLogout function)
+export const navigationData = {
+  navMain: [
+    {
+      title: "Main",
+      items: [
+        {
+          title: "Dashboard",
+          url: "/dashboard",
+          icon: <LayoutDashboard className="h-4 w-4" />,
+        },
+        // ... other items (same as above but without onClick handlers)
+      ],
+    },
+    {
+      title: "System",
+      items: [
+        // ... other items
+        {
+          title: "Logout",
+          url: "#",
+          icon: <LogOut className="h-4 w-4" />,
+        },
+      ],
+    },
+  ],
 }

@@ -9,44 +9,61 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { data } from "@/components/client-components/app-sidebar"; // Import your navigation data
 
 export function BreadcrumbNav() {
   const pathname = usePathname();
   
-  // Function to find the matching nav item title
-  const findNavTitle = (path) => {
-    // First check main items
-    const mainItem = data.navMain.find(item => item.url === path);
-    if (mainItem) return mainItem.title;
+  // Function to get the current page title
+  const getCurrentPageTitle = (path) => {
+    // Remove trailing slash if exists
+    path = path.replace(/\/$/, '');
+    
+    // Map of paths to titles
+    const pathTitles = {
+      '/dashboard': 'Dashboard',
+      '/dashboard/employees': 'Employees',
+      '/dashboard/attendance': 'Attendance',
+      '/dashboard/departments': 'Departments',
+      '/dashboard/shifts': 'Shifts',
+      '/dashboard/leaves': 'Leaves',
+      '/dashboard/print': 'Print Records',
+      '/dashboard/user-settings': 'Settings'
+    };
 
-    // Then check sub items
-    for (const main of data.navMain) {
-      if (main.items) {
-        const subItem = main.items.find(item => item.url === path);
-        if (subItem) return subItem.title;
-      }
-    }
-
-    // If no match found, return capitalized path segment
-    const segment = path.split('/').pop();
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
+    return pathTitles[path] || 'Dashboard';
   };
 
-  const currentTitle = findNavTitle(pathname);
+  const currentTitle = getCurrentPageTitle(pathname);
+  const isSubPage = pathname !== '/dashboard';
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem className="hidden md:block">
-          <BreadcrumbLink href="/dashboard">
-            <p>Attendease Admin</p>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator className="hidden md:block" />
         <BreadcrumbItem>
-          <BreadcrumbPage><h3>{currentTitle}</h3></BreadcrumbPage>
+            Attendease Admin
         </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          {pathname === '/dashboard' ? (
+            <BreadcrumbPage className="font-medium text-foreground">
+              Dashboard
+            </BreadcrumbPage>
+          ) : (
+            <BreadcrumbLink href="/dashboard">
+              Dashboard
+            </BreadcrumbLink>
+          )}
+        </BreadcrumbItem>
+        {isSubPage && (
+          <>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-medium text-foreground">
+                {currentTitle}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </>
+        )}
       </BreadcrumbList>
     </Breadcrumb>
   );
