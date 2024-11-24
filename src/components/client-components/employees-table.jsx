@@ -316,7 +316,7 @@ export function EmployeesTable() {
               />
             </TableHead>
             <TableHead className="text-[#71717A] text-sm">Email</TableHead>
-            <TableHead className="text-right text-[#71717A] text-sm">Actions</TableHead>
+            <TableHead className="text-[#71717A] text-sm text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

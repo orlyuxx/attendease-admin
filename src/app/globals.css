@@ -68,10 +68,9 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen;
   }
 }
-
 
 html {
   scroll-behavior: smooth;
@@ -84,4 +83,9 @@ h1, h2, h3, h4, h5, h6 {
 /* Default styles for p tags */
 p {
   color: #71717A; /* Grayish color */
+}
+
+/* Add a specific class for the login page background */
+.login-page {
+  background-color: #f0f9ff;
 }

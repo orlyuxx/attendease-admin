@@ -15,7 +15,9 @@ export default function DashboardPage() {
       <DashboardCards />
 
       {/* Charts */}
-      <DashboardCharts />
+      <div className="px-2">
+        <DashboardCharts />
+      </div>
     </div>
   )
 }
