@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -36,7 +36,7 @@ export function LoginForm() {
 
     try {
       const result = await login(email, password);
-      
+
       if (!result.success) {
         setError(result.error || "Invalid credentials");
         return;
@@ -52,9 +52,9 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center ">
       <div className="relative container mt-8 px-4">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto shadow-2xl">
           <Card className="w-full mx-auto backdrop-blur-sm bg-white/95 border-t-4 border-t-blue-600">
             <div className="flex justify-center -mt-12">
               <div className="relative w-28 h-28">
@@ -69,11 +69,16 @@ export function LoginForm() {
               </div>
             </div>
 
-            <CardHeader className="text-center space-y-2 -mt-8">
-              <CardTitle className="text-2xl font-serif">BIR Butuan City</CardTitle>
-              <CardTitle className="text-2xl font-serif">Attendease Login Portal</CardTitle>
-              <CardDescription className="max-w-sm mx-auto pt-2">
-                Access your BIR Butuan City Attendease admin account securely to manage your employees' attendance.
+            <CardHeader className="text-center text-text-header space-y-2 -mt-8">
+              <CardTitle className="text-2xl font-serif">
+                BIR Butuan City
+              </CardTitle>
+              <CardTitle className="text-2xl text-text-header font-serif">
+                Attendease Login Portal
+              </CardTitle>
+              <CardDescription className="text-text-sub max-w-sm mx-auto pt-2">
+                Access your Attendease admin account to manage your employees'
+                attendance.
               </CardDescription>
             </CardHeader>
 
@@ -86,7 +91,7 @@ export function LoginForm() {
                   </div>
                 )}
 
-                <div className="grid gap-2">
+                <div className="grid gap-2 mt-4">
                   <Label htmlFor="email" className="font-medium">
                     Email Address
                   </Label>
@@ -95,8 +100,8 @@ export function LoginForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="example@gmail.com"
-                    className="focus:ring-1 focus:ring-gray-950 "
+                    // placeholder="example@gmail.com"
+                    className="border-2 border-gray-300 "
                     disabled={isLoading}
                     required
                   />
@@ -120,7 +125,7 @@ export function LoginForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className=" focus:ring-1 focus:ring-gray-950"
+                    className=" focus:ring-1 focus:ring-gray-950 border-2 border-gray-300"
                     disabled={isLoading}
                     required
                   />
@@ -128,7 +133,7 @@ export function LoginForm() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 transition-colors"
+                  className="w-full bg-my-blue hover:bg-my-blue-700 text-white py-2.5 transition-colors"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -142,27 +147,29 @@ export function LoginForm() {
                 </Button>
               </form>
 
-              <div className="mt-6 pt-6 border-t border-gray-100">
+              {/* <div className="mt-6 pt-6 border-t border-gray-100">
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                   <Shield size={14} />
                   This is an official government portal
                 </div>
-              </div>
+              </div> */}
 
               <div className="mt-4 text-sm text-center text-gray-600">
                 Don&apos;t have an account?{" "}
-                <Link href="#" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">
+                <Link
+                  href="#"
+                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                >
                   Register here
                 </Link>
               </div>
-
-              
             </CardContent>
           </Card>
         </div>
 
-        <div className="mt-4 text-center text-sm text-gray-500">
-          Need help? Contact BIR Support at <span className="font-medium">1-234-5678</span>
+        <div className="mt-4 text-center text-sm text-text-header font-medium">
+          Need help? Contact BIR Support at{" "}
+          <span className="font-medium">1-234-5678</span>
         </div>
       </div>
     </div>

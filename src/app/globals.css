@@ -76,16 +76,16 @@ html {
   scroll-behavior: smooth;
 }
 /* Default styles for h tags */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #09090b; /* Dark color */
 }
 
 /* Default styles for p tags */
 p {
-  color: #71717A; /* Grayish color */
-}
-
-/* Add a specific class for the login page background */
-.login-page {
-  background-color: #f0f9ff;
+  color: #71717a; /* Grayish color */
 }
