@@ -111,7 +111,7 @@ export function AppSidebar({ ...props }) {
 
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="mb-6 flex items-center justify-center w-full ">
+      <SidebarHeader className="flex items-center justify-center w-full ">
         <SidebarMenu className="flex items-center justify-center">
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
@@ -177,7 +177,7 @@ export function AppSidebar({ ...props }) {
                           ) : (
                             <a
                               href={subItem.url}
-                              className="flex items-center gap-2 text-lg"
+                              className="flex items-center gap-2 text-2xl"
                             >
                               {renderIcon(
                                 subItem.icon,

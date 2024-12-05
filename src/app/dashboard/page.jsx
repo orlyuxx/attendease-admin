@@ -4,7 +4,7 @@ import DashboardCharts from "@/components/client-components/dashboard-charts";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6 py-2 mb-60">
+    <div className="space-y-6 py-2 mb-10">
       {/* Date and Time */}
       <div className="pl-2">
         <DashboardDate />
