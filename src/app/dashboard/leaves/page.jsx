@@ -1,254 +1,262 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import Modal from "react-modal";
+import { CheckCircle, XCircle, Trash2 } from "lucide-react";
 
-const initialLeaveData = [
-  {
-    id: 1,
-    employee_name: "John Doe",
-    leave_type: "Sick Leave",
-    start_date: "2023-10-01",
-    end_date: "2023-10-03",
-    no_of_days: 3,
-    reason: "Flu",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    employee_name: "Jane Smith",
-    leave_type: "Vacation",
-    start_date: "2023-10-05",
-    end_date: "2023-10-10",
-    no_of_days: 6,
-    reason: "Family Trip",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    employee_name: "Alice Johnson",
-    leave_type: "Personal Leave",
-    start_date: "2023-10-12",
-    end_date: "2023-10-14",
-    no_of_days: 3,
-    reason: "Personal Matters",
-    status: "Pending",
-  },
-  {
-    id: 4,
-    employee_name: "Bob Brown",
-    leave_type: "Sick Leave",
-    start_date: "2023-10-15",
-    end_date: "2023-10-17",
-    no_of_days: 3,
-    reason: "Medical Appointment",
-    status: "Pending",
-  },
-  {
-    id: 5,
-    employee_name: "Charlie Davis",
-    leave_type: "Vacation",
-    start_date: "2023-10-20",
-    end_date: "2023-10-25",
-    no_of_days: 6,
-    reason: "Holiday",
-    status: "Pending",
-  },
-];
+export default function LeavesPage() {
+  const [leaves, setLeaves] = useState([]);
+  const [users, setUsers] = useState({});
+  const [leaveTypes, setLeaveTypes] = useState({});
+  const [selectedLeave, setSelectedLeave] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
-const initialLeaveTypes = [
-  { id: 1, name: "Sick Leave" },
-  { id: 2, name: "Vacation" },
-  { id: 3, name: "Personal Leave" },
-  { id: 4, name: "Maternity Leave" },
-  { id: 5, name: "Paternity Leave" },
-];
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
 
-export default function LeavePage() {
-  const [leaveData, setLeaveData] = useState(initialLeaveData);
-  const [leaveTypes, setLeaveTypes] = useState(initialLeaveTypes);
-  const [newLeaveTypeName, setNewLeaveTypeName] = useState("");
+      try {
+        // Fetch all required data in parallel
+        const [leavesRes, usersRes, leaveTypesRes] = await Promise.all([
+          fetch("http://attendease-backend.test/api/leave", { headers }),
+          fetch("http://attendease-backend.test/api/user", { headers }),
+          fetch("http://attendease-backend.test/api/leavetype", { headers }),
+        ]);
 
-  const handleApprove = (id) => {
-    setLeaveData((prevData) =>
-      prevData.map((record) =>
-        record.id === id ? { ...record, status: "Approved" } : record
-      )
-    );
-  };
+        // Check if responses are ok
+        if (!leavesRes.ok || !usersRes.ok || !leaveTypesRes.ok) {
+          throw new Error("Network response was not ok");
+        }
 
-  const handleReject = (id) => {
-    setLeaveData((prevData) =>
-      prevData.map((record) =>
-        record.id === id ? { ...record, status: "Rejected" } : record
-      )
-    );
-  };
+        const leavesData = await leavesRes.json();
+        const usersData = await usersRes.json();
+        const leaveTypesData = await leaveTypesRes.json();
 
-  const handleAddLeaveType = (e) => {
-    e.preventDefault();
-    if (newLeaveTypeName.trim() === "") return;
+        // console.log("Raw Users Data:", usersData);
+        // console.log("Raw Leave Types Data:", leaveTypesData);
 
-    const newLeaveType = {
-      id: leaveTypes.length + 1,
-      name: newLeaveTypeName,
+        // Create lookup objects
+        const userMap = {};
+        usersData.forEach((user) => {
+          userMap[user.user_id] = `${user.firstname} ${user.lastname}`;
+        });
+
+        const leaveTypeMap = {};
+        leaveTypesData.forEach((type) => {
+          leaveTypeMap[type.leave_type_id] = type.leave_name;
+        });
+
+        // console.log("User Map:", userMap);
+        // console.log("Leave Type Map:", leaveTypeMap);
+        // console.log("Leaves Data:", leavesData);
+
+        setLeaves(leavesData);
+        setUsers(userMap);
+        setLeaveTypes(leaveTypeMap);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    setLeaveTypes((prevLeaveTypes) => [...prevLeaveTypes, newLeaveType]);
-    setNewLeaveTypeName("");
+    fetchData();
+  }, []);
+
+  // console.log("Leaves Data:", leaves);
+  // console.log("Users Data:", users);
+  // console.log("Leave Types Data:", leaveTypes);
+
+  const openModal = (leave) => {
+    setSelectedLeave(leave);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedLeave(null);
+    setModalIsOpen(false);
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      const response = await fetch(
+        `http://attendease-backend.test/api/leave/approve/${id}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      if (response.ok) {
+        closeModal();
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error approving leave:", error);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const response = await fetch(
+        `http://attendease-backend.test/api/leave/reject/${id}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      if (response.ok) {
+        closeModal();
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error rejecting leave:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(
+        `http://attendease-backend.test/api/leave/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      if (response.ok) {
+        closeModal();
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error deleting leave:", error);
+    }
   };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Leave Requests</h1>
 
-      <div className="overflow-x-auto bg-white rounded-lg shadow mb-6">
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {[
-                "No.",
-                "Employee Name",
-                "Leave Type",
-                "Start Date",
-                "End Date",
-                "No. of Days",
-                "Reason",
-                "Status",
-                "Actions",
-              ].map((header, index) => (
-                <th
-                  key={index}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {header}
-                </th>
-              ))}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                No.
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Employee Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Leave Type
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Start Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                End Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Reason
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Days
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {leaveData.map((record) => (
-              <tr key={record.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {record.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {record.employee_name}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {record.leave_type}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {record.start_date}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {record.end_date}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {record.no_of_days}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{record.reason}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      record.status === "Approved"
-                        ? "bg-green-100 text-green-800"
-                        : record.status === "Rejected"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {record.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <button
-                    onClick={() => handleApprove(record.id)}
-                    className="mr-2 px-3 py-1 text-xs font-semibold text-white bg-green-500 rounded hover:bg-green-600"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleReject(record.id)}
-                    className="px-3 py-1 text-xs font-semibold text-white bg-red-500 rounded hover:bg-red-600"
-                  >
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {leaves.map((leave, index) => {
+              console.log(leave);
+              return (
+                <tr
+                  key={`${leave.user_id}-${leave.leave_start}-${index}`}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => openModal(leave)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {users[leave.user_id] || "Unknown User"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leaveTypes[leave.leave_type_id] || "Unknown Leave Type"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(leave.leave_start).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(leave.leave_end).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {leave.reason}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.number_of_days}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                      ${
+                        leave.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : leave.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {leave.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent modal from opening
+                        handleApprove(leave.leave_id);
+                      }}
+                      className="text-green-600 hover:text-green-900"
+                      title="Approve"
+                    >
+                      <CheckCircle className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReject(leave.leave_id);
+                      }}
+                      className="text-yellow-600 hover:text-yellow-900"
+                      title="Reject"
+                    >
+                      <XCircle className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(leave.leave_id);
+                      }}
+                      className="text-red-600 hover:text-red-900"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </div>
-
-      <h2 className="text-xl font-bold text-gray-800 mt-20 mb-4">
-        Leave Types
-      </h2>
-      <div className="flex">
-        <div className="w-1/2 pr-4">
-          <div className="overflow-x-auto bg-white rounded-lg shadow mb-6">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {["No.", "Leave Type"].map((header, index) => (
-                    <th
-                      key={index}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {leaveTypes.map((leaveType) => (
-                  <tr key={leaveType.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {leaveType.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {leaveType.name}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="w-1/2 pl-4 -mt-10">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            Add New Leave Type
-          </h2>
-          <form
-            onSubmit={handleAddLeaveType}
-            className="bg-white rounded-lg shadow p-4"
-          >
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Leave Type Name
-              </label>
-              <input
-                type="text"
-                value={newLeaveTypeName}
-                onChange={(e) => setNewLeaveTypeName(e.target.value)}
-                className="border border-gray-300 rounded-md p-2 w-full"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white font-semibold py-2 rounded hover:bg-blue-600"
-            >
-              Add Leave Type
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );
