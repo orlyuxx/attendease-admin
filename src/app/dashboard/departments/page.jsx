@@ -1,68 +1,86 @@
 "use client";
 
-import React, { useState } from "react";
-
-const initialDepartments = [
-  { id: 1, name: "Human Resources", numberOfEmployees: 10 },
-  { id: 2, name: "Engineering", numberOfEmployees: 25 },
-  { id: 3, name: "Marketing", numberOfEmployees: 15 },
-  { id: 4, name: "Sales", numberOfEmployees: 20 },
-  { id: 5, name: "Finance", numberOfEmployees: 8 },
-];
+import React, { useState, useEffect } from "react";
 
 export default function DepartmentsPage() {
-  const [departments, setDepartments] = useState(initialDepartments);
+  const [departments, setDepartments] = useState([]);
   const [newDepartmentName, setNewDepartmentName] = useState("");
-  const [newDepartmentEmployees, setNewDepartmentEmployees] = useState(0);
 
-  const handleAddDepartment = (e) => {
+  // Fetch departments from API
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+      const response = await fetch(
+        "http://attendease-backend.test/api/department",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      console.log("Fetched departments:", data); // Debugging line
+      setDepartments(data); // Assuming the API returns an array of departments
+    };
+
+    fetchDepartments();
+  }, []);
+
+  const handleAddDepartment = async (e) => {
     e.preventDefault();
     if (newDepartmentName.trim() === "") return;
 
-    const newDepartment = {
-      id: departments.length + 1,
-      name: newDepartmentName,
-      numberOfEmployees: newDepartmentEmployees,
-    };
+    const response = await fetch(
+      "http://attendease-backend.test/api/department",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ department_name: newDepartmentName }),
+      }
+    );
 
-    setDepartments((prevDepartments) => [...prevDepartments, newDepartment]);
-    setNewDepartmentName("");
-    setNewDepartmentEmployees(0);
+    if (response.ok) {
+      const newDepartment = await response.json(); // Assuming the API returns the created department
+      setDepartments((prevDepartments) => [...prevDepartments, newDepartment]);
+      setNewDepartmentName("");
+    }
   };
 
   return (
     <div className="p-6 flex">
       <div className="w-1/2 pr-4">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Departments</h1>
+        <h1 className="text-lg font-bold text-text-header mb-6">Departments</h1>
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {["No.", "Department Name", "Number of Employees"].map(
-                  (header, index) => (
-                    <th
-                      key={index}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      {header}
-                    </th>
-                  )
-                )}
+                {[
+                  { id: "number", label: "No." },
+                  { id: "name", label: "Department Name" },
+                ].map((header) => (
+                  <th
+                    key={header.id}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {header.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {departments.map((department) => (
-                <tr key={department.id} className="hover:bg-gray-50">
+                <tr key={department.department_id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {department.id}
+                    {department.department_id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {department.name}
+                      {department.department_name}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {department.numberOfEmployees}
                   </td>
                 </tr>
               ))}
@@ -72,7 +90,7 @@ export default function DepartmentsPage() {
       </div>
 
       <div className="w-1/2 pl-4 mt-2">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">
+        <h2 className="text-lg font-bold text-text-header mb-4">
           Add New Department
         </h2>
         <form
@@ -87,20 +105,6 @@ export default function DepartmentsPage() {
               type="text"
               value={newDepartmentName}
               onChange={(e) => setNewDepartmentName(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 w-full"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Employees
-            </label>
-            <input
-              type="number"
-              value={newDepartmentEmployees}
-              onChange={(e) =>
-                setNewDepartmentEmployees(Number(e.target.value))
-              }
               className="border border-gray-300 rounded-md p-2 w-full"
               required
             />

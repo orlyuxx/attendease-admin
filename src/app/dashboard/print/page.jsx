@@ -1,34 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
-
-const employees = [
-  { id: 1, name: "John Doe" },
-  { id: 2, name: "Jane Smith" },
-  { id: 3, name: "Alice Johnson" },
-  { id: 4, name: "Bob Brown" },
-  { id: 5, name: "Charlie Davis" },
-];
-
-const months = [
-  { value: "01", label: "January" },
-  { value: "02", label: "February" },
-  { value: "03", label: "March" },
-  { value: "04", label: "April" },
-  { value: "05", label: "May" },
-  { value: "06", label: "June" },
-  { value: "07", label: "July" },
-  { value: "08", label: "August" },
-  { value: "09", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
 
 export default function PrintPage() {
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [employees, setEmployees] = useState([]);
+
+  const months = [
+    { value: "01", label: "January" },
+    { value: "02", label: "February" },
+    { value: "03", label: "March" },
+    { value: "04", label: "April" },
+    { value: "05", label: "May" },
+    { value: "06", label: "June" },
+    { value: "07", label: "July" },
+    { value: "08", label: "August" },
+    { value: "09", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+  ];
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://attendease-backend.test/api/user", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEmployees(data);
+      } else {
+        console.error("Failed to fetch employees");
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const handlePrint = () => {
     if (!selectedEmployee || !selectedMonth) {
@@ -91,7 +106,7 @@ export default function PrintPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Print Records</h1>
+      <h1 className="text-lg font-bold text-text-header mb-6">Print Records</h1>
 
       <div className="bg-white rounded-lg shadow p-4">
         <div className="mb-4">
@@ -106,8 +121,8 @@ export default function PrintPage() {
           >
             <option value="">-- Select Employee --</option>
             {employees.map((employee) => (
-              <option key={employee.id} value={employee.name}>
-                {employee.name}
+              <option key={employee.user_id} value={employee.name}>
+                {`${employee.firstname} ${employee.lastname}`}
               </option>
             ))}
           </select>

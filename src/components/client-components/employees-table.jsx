@@ -44,7 +44,6 @@ const formatEmployeeId = (id) => {
 export function EmployeesTable() {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,7 +55,6 @@ export function EmployeesTable() {
 
   // Helper function that depends on departments state
   const getDepartmentName = (departmentId) => {
-    if (!departments) return "Loading...";
     const department = departments.find(
       (dept) => dept.department_id === departmentId
     );
@@ -186,8 +184,6 @@ export function EmployeesTable() {
       } catch (err) {
         setError(err.message);
         console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -196,7 +192,6 @@ export function EmployeesTable() {
 
   const refreshEmployees = async () => {
     try {
-      setLoading(true);
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -227,8 +222,6 @@ export function EmployeesTable() {
       if (error.message === "Please login again") {
         window.location.href = "/login";
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -237,7 +230,6 @@ export function EmployeesTable() {
     refreshEmployees();
   };
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (

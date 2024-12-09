@@ -120,7 +120,7 @@ export function AppSidebar({ ...props }) {
                   <img
                     src="/attendease-logo.png"
                     alt="Attendease Logo"
-                    className="h-8 w-auto max-w-full"
+                    className="h-10 w-auto max-w-full"
                   />
                 </div>
               </Link>
